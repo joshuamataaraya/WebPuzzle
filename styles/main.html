@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+        <title>Puzzle</title>
+        <link rel="stylesheet" type="text/css" href="../Components/bootstrap/css/bootstrap.min.css">
+        <script src="../Components/jquery/jquery-2.1.3.min.js"></script>
+        <script src="../Components/bootstrap/js/bootstrap.min.js"></script>
+    </head>
+    <body> 
+        <div class="container">
+            <h1 >Rompecabezas
+                <small>Designed by Joshua Mata</small>
+            </h1>
+        </div>
+        <form role="from">
+            <div class="form">
+                <div class="col-xs-13">
+                    <div class="input-group">
+                        <input id='url'type="url" class="form-control" placeholder="Insert the image url here&hellip;">
+                        <span class="input-group-btn">
+                            <button onclick="getImageid()" type="Button"class="btn btn-default">Search</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <canvas id="myCanvas" class="img-thumbnail"></canvas>
+        <button onclick="cropImg()" type="Button"class="btn btn-default">Crop Image</button>
+    </body>
+    <script src="../scripts/main.js"></script>
+</html>
