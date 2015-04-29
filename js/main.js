@@ -16,7 +16,7 @@ $("#crop").click(function(){
   var total=((img.width)-(img.width)%10)/10;
   var quadrants=generateQuadrants();
   var partCounter=1;
-  while(quadrants.length>0){
+  while(quadrants.length>0 && parts.length<50){
     var quadrant=quadrants[0];
     if(isAbleHundred(quadrant,quadrants)){ //insert parts of 100x10
       var quadrantToInsert=quadrant;
@@ -31,7 +31,9 @@ $("#crop").click(function(){
         quadrants.splice(quadrants.indexOf(quadrantToInsert),1);
         quadrantToInsert++;
       }
+      alert(5)
       getPartImg2(part,ctx);
+
       parts.push(part);
       quadrant=quadrants[0]; 
     }
@@ -48,6 +50,7 @@ $("#crop").click(function(){
         quadrants.splice(quadrants.indexOf(quadrantToInsert),1);
         quadrantToInsert=getDownQuadrant(quadrantToInsert,total);
       }
+      alert(5)
       getPartImg2(part,ctx);   
       parts.push(part);
       quadrant=quadrants[0];
@@ -62,6 +65,7 @@ $("#crop").click(function(){
       partCounter++;
       part.quadrants.push(quadrantToInsert);
       quadrants.splice(quadrants.indexOf(quadrantToInsert),1);
+      alert(5)
       getPartImg2(part,ctx);
       parts.push(part);       
       quadrant=quadrants[0];
@@ -76,7 +80,11 @@ $("#crop").click(function(){
 });
 $("#blend").click(function(){
   $("#imsSpace").empty();
+  var c = document.getElementById("can");
+  var ctx = c.getContext("2d");
+  ctx.clearRect(0, 0, c.width, c.height);
   var counter =parts.length-1;
+  alert(counter)
   while (--counter) {
     var j = Math.floor((Math.random()*1000)%parts.length); 
     var i = counter; 
@@ -88,8 +96,9 @@ $("#blend").click(function(){
   appendPartsToImage();
 });
 $("#voraz").click(function(){
-  $("#can").empty();
-
+  var c = document.getElementById("can");
+  var ctx = c.getContext("2d");
+  ctx.clearRect(0, 0, c.width, c.height);
   var loopNumber=1;
   var tempSolution=parts;
   while(noSolution(tempSolution,loopNumber)){
@@ -100,7 +109,7 @@ $("#voraz").click(function(){
   appendPartsToImage();
 });
 noSolution=function(tempSolution,loopNumber){
-  if(loopNumber<15){
+  if(loopNumber<1800){
     for(var partIndex=1;partIndex<tempSolution.length;partIndex++){
       if(tempSolution[partIndex].num<tempSolution[partIndex-1].num){
         return true;
@@ -123,57 +132,106 @@ selectSolution=function(tempSolution){
 }
 
 $("#backtrack").click(function(){
-  $("#can").empty();
-  //meto un elemento
-  //si es menor que el 
-  part3={
-    num:3
-  };
-  part4={
-    num:4
-  };
-  part1={
-    num:1
-  };
-  part2={
-    num:2
-  };
-  var solution=[];
-  var p=[part3,part4,part1,part2];
-  solution=backtracking(0,p,solution,0);
+  var c = document.getElementById("can");
+  var ctx = c.getContext("2d");
+  ctx.clearRect(0, 0, c.width, c.height);
+  // meto un elemento
+  // si es menor que el 
+  // part3={
+  //   num:3
+  // };
+  // part4={
+  //   num:4
+  // };
+  // part1={
+  //   num:1
+  // };
+  // part2={
+  //   num:2
+  // };
+  // var solution=[];
+  // var p=[part3,part4,part1,part2];
+  // solution=backtracking(0,p,solution,0);
 
-  // if(parts.length!=0){
-  //   var solution=[];
-  //   solution=backtracking(0,parts,solution,0);  
-  //   parts=solution;
-  //   appendPartsToImage();
-  // }else{
-  //   alert("You have to crop an image first")
-  // }
+  if(parts.length!=0){
+    alert(parts.length)
+    var solution=[];
+    solution=backtracking2(0,parts,solution,0);  
+    parts=solution;
+    appendPartsToImage();
+  }else{
+    alert("You have to crop an image first")
+  }
 });
-backtracking=function(index,allParts,partsSol,indexToRest){
+backtracking2=function(index,allParts,partsSol,indexToRest,isBackTrack){
+  var solution=false;
+  while(!solution){
+    if(notIn(allParts[index],partsSol)){
+      partsSol.push(allParts[index]);
+      if(index==0 || partsSol.length==1|| partsSol[partsSol.length-1].num>partsSol[partsSol.length-2].num){
+        if(partsSol.length==allParts.length){
+          solution=true;
+        }else{
+          if(!isBackTrack){ //when it find a solution, cheks if there was any backTrack before 
+            ++index;
+          }else{
+            index=indexToRest;
+            indexToRest=0;
+            isBackTrack=false;
+          }
+        }
+      }else{ //backtrack here
+        var beforeLastPart=allParts.indexOf(partsSol[partsSol.length-2]);
+        if(isBackTrack){ //if it is comming from a backtrack 
+          if(beforeLastPart<indexToRest)
+          {
+            indexToRest=beforeLastPart;
+          }
+        }else{
+          indexToRest=beforeLastPart;
+        }
+        partsSol.pop();
+        partsSol.pop();
+        isBackTrack=true;
+      }
+    }else{
+      index++;
+      isBackTrack=false;
+    }
+  }
+  return partsSol
+}
+backtracking=function(index,allParts,partsSol,indexToRest,isBackTrack){
   if(notIn(allParts[index],partsSol)){
     partsSol.push(allParts[index]);
     if(index==0 || partsSol.length==1|| partsSol[partsSol.length-1].num>partsSol[partsSol.length-2].num){
       if(partsSol.length==allParts.length){
         return partsSol;
       }else{
-        if(indexToRest==0){ //when it find a solution, cheks it there was any backTrack before 
+        if(!isBackTrack){ //when it find a solution, cheks if there was any backTrack before 
           return backtracking(++index,allParts,partsSol,indexToRest);
         }else{
-          index=index-indexToRest;
+          index=indexToRest;
           indexToRest=0;
-          return backtracking(0,allParts,partsSol,indexToRest); 
+          return backtracking(index,allParts,partsSol,indexToRest,false); 
         }
       }
     }else{ //backtrack here
+      var beforeLastPart=allParts.indexOf(partsSol[partsSol.length-2]);
+      if(isBackTrack){ //if it is comming from a backtrack 
+        if(beforeLastPart<indexToRest)
+        {
+          indexToRest=beforeLastPart;
+        }
+      }else{
+        indexToRest=beforeLastPart;
+      }
       partsSol.pop();
       partsSol.pop();
-      indexToRest++;
-      return backtracking(index,allParts,partsSol,indexToRest);
+      return backtracking(index,allParts,partsSol,indexToRest,true);
     }
   }else{
-    return backtracking(++index,allParts,partsSol,indexToRest);
+    return backtracking(++index,allParts,partsSol,indexToRest,false);
   }
 }
 notIn=function(a,b){
@@ -245,7 +303,11 @@ isAbleHundred=function(firstQuadrant,quadrants){
 	var img = document.getElementById("image");
 	var total=((img.width)-(img.width)%10)/10; //the quadrants are of 10x10
 	var quadrant=firstQuadrant;
-	var commonValueOfTheLine=Math.floor(quadrant/total);
+  if(quadrant%total==0){
+    var commonValueOfTheLine=Math.floor(quadrant/total)-1; 
+  }else{
+    var commonValueOfTheLine=Math.floor(quadrant/total); 
+  }
 	for(var quadrantNumber=1;quadrantNumber<=10;quadrantNumber++){
 	  if(isCroped(quadrant,quadrants) || 
 	    (Math.floor(quadrant/total)>commonValueOfTheLine && quadrant%total!=0)){
